@@ -651,3 +651,4 @@ ESPSection:AddToggle({
 		Library:SetShowDistance(Value)
 	end
 })
+return Library
