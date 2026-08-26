@@ -1,3 +1,251 @@
+--// Services
+local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+
+--// Library Load (Compkiller)
+local Compkiller = loadstring(game:HttpGet("https://raw.githubusercontent.com/4lpaca-pin/CompKiller/refs/heads/main/src/source.luau"))();
+
+--// Notifications & Config
+local Notifier = Compkiller.newNotify();
+local ConfigManager = Compkiller:ConfigManager({
+	Directory = "HorryMod-Doors",
+	Config = "Doors-Configs"
+});
+
+--// Настройки звуков
+local soundSettings = {
+	Enabled = true,
+	Volume = 0.7,
+	Id = "rbxassetid://4590657391" 
+}
+
+local function playClickSound()
+	if not soundSettings.Enabled then return end
+	task.spawn(function()
+		pcall(function()
+			local s = Instance.new("Sound")
+			s.SoundId = soundSettings.Id
+			s.Volume = soundSettings.Volume
+			s.Parent = Workspace
+			s:Play()
+			s.Ended:Connect(function()
+				s:Destroy()
+			end)
+			task.delay(1, function()
+				if s and s.Parent then
+					s:Destroy()
+				end
+			end)
+		end)
+	end)
+end
+
+playClickSound()
+
+--// Loader
+Compkiller:Loader(nil, 2.0).yield();
+
+--// 🪟 Кастомное предупреждение по центру (Beta Test Notice)
+task.spawn(function()
+	pcall(function()
+		local screenGui = Instance.new("ScreenGui")
+		screenGui.Name = "HorryMod_BetaNotice"
+		screenGui.ResetOnSpawn = false
+		screenGui.Parent = CoreGui
+
+		local mainFrame = Instance.new("Frame")
+		mainFrame.Size = UDim2.new(0, 360, 0, 180)
+		mainFrame.Position = UDim2.new(0.5, -180, 0.5, -90)
+		mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+		mainFrame.BorderSizePixel = 0
+		mainFrame.Parent = screenGui
+
+		local uiCorner = Instance.new("UICorner")
+		uiCorner.CornerRadius = UDim.new(0, 10)
+		uiCorner.Parent = mainFrame
+
+		local uiStroke = Instance.new("UIStroke")
+		uiStroke.Color = Color3.fromRGB(0, 170, 255)
+		uiStroke.Thickness = 2
+		uiStroke.Parent = mainFrame
+
+		local titleLabel = Instance.new("TextLabel")
+		titleLabel.Size = UDim2.new(1, 0, 0, 45)
+		titleLabel.BackgroundTransparency = 1
+		titleLabel.Text = "ВНИМАНИЕ (BETA)"
+		titleLabel.TextColor3 = Color3.fromRGB(255, 220, 0)
+		titleLabel.TextSize = 18
+		titleLabel.Font = Enum.Font.GothamBold
+		titleLabel.Parent = mainFrame
+
+		local descLabel = Instance.new("TextLabel")
+		descLabel.Size = UDim2.new(1, -30, 0, 75)
+		descLabel.Position = UDim2.new(0, 15, 0, 45)
+		descLabel.BackgroundTransparency = 1
+		descLabel.Text = "Это бета тест скрипта, могут быть лаги и т.д. В дальнейшем будем делать скрипт все более и более лучше!"
+		descLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+		descLabel.TextSize = 14
+		descLabel.Font = Enum.Font.Gotham
+		descLabel.TextWrapped = true
+		descLabel.Parent = mainFrame
+
+		local okButton = Instance.new("TextButton")
+		okButton.Size = UDim2.new(0, 120, 0, 35)
+		okButton.Position = UDim2.new(0.5, -60, 1, -45)
+		okButton.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+		okButton.Text = "ПОНЯТНО"
+		okButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		okButton.TextSize = 14
+		okButton.Font = Enum.Font.GothamBold
+		okButton.Parent = mainFrame
+
+		local btnCorner = Instance.new("UICorner")
+		btnCorner.CornerRadius = UDim.new(0, 6)
+		btnCorner.Parent = okButton
+
+		okButton.MouseButton1Click:Connect(function()
+			playClickSound()
+			screenGui:Destroy()
+		end)
+	end)
+end)
+
+--// 🚀 Уведомление для ошибки трейсеров
+local function showCustomCornerWarning(text)
+	task.spawn(function()
+		pcall(function()
+			local screenGui = Instance.new("ScreenGui")
+			screenGui.Name = "HorryMod_CornerWarning"
+			screenGui.ResetOnSpawn = false
+			screenGui.Parent = CoreGui
+
+			local frame = Instance.new("Frame")
+			frame.Size = UDim2.new(0, 280, 0, 50)
+			frame.Position = UDim2.new(1, -300, 1, 20)
+			frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+			frame.BorderSizePixel = 0
+			frame.BackgroundTransparency = 0.2
+			frame.Parent = screenGui
+
+			local corner = Instance.new("UICorner")
+			corner.CornerRadius = UDim.new(0, 8)
+			corner.Parent = frame
+
+			local stroke = Instance.new("UIStroke")
+			stroke.Color = Color3.fromRGB(255, 80, 80)
+			stroke.Thickness = 1.5
+			stroke.Parent = frame
+
+			local label = Instance.new("TextLabel")
+			label.Size = UDim2.new(1, 0, 1, 0)
+			label.BackgroundTransparency = 1
+			label.Text = text
+			label.TextColor3 = Color3.fromRGB(255, 255, 255)
+			label.TextSize = 12
+			label.Font = Enum.Font.GothamBold
+			label.TextWrapped = true
+			label.Parent = frame
+
+			local tweenIn = TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				Position = UDim2.new(1, -300, 1, -70)
+			})
+			tweenIn:Play()
+			tweenIn.Completed:Wait()
+
+			task.wait(2)
+
+			local tweenOut = TweenService:Create(frame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+				Position = UDim2.new(1, -300, 1, -140),
+				BackgroundTransparency = 1
+			})
+			local textTween = TweenService:Create(label, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+				TextTransparency = 1
+			})
+			local strokeTween = TweenService:Create(stroke, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+				Transparency = 1
+			})
+
+			tweenOut:Play()
+			textTween:Play()
+			strokeTween:Play()
+
+			tweenOut.Completed:Wait()
+			screenGui:Destroy()
+		end)
+	end)
+end
+
+--// Creating Window
+local Window = Compkiller.new({
+	Name = "HorryMod | DOORS Ultimate",
+	Keybind = "LeftAlt",
+	Logo = "",
+	Scale = Compkiller.Scale.Window,
+	TextSize = 15,
+});
+
+Notifier.new({
+	Title = "HorryMod Запущен",
+	Content = "Добро пожаловать в чит-хаб DOORS! Нажми LeftAlt.",
+	Duration = 5,
+});
+
+--// Watermark
+local Watermark = Window:Watermark();
+Watermark:AddText({ Icon = "user", Text = "HorryMod User" });
+local Time = Watermark:AddText({ Icon = "timer", Text = "TIME" });
+task.spawn(function()
+	while true do task.wait(1)
+		Time:SetText(Compkiller:GetTimeNow());
+	end
+end)
+Watermark:AddText({ Icon = "server", Text = Compkiller.Version });
+
+--// --- ВКЛАДКИ ---
+local HomeTab = Window:DrawTab({ Name = "Главная", Icon = "home", EnableScrolling = true });
+local DoorsTab = Window:DrawTab({ Name = "DOORS Функции", Icon = "eye", EnableScrolling = true });
+local ExtraTab = Window:DrawTab({ Name = "Т.д", Icon = "list", EnableScrolling = true });
+
+Window:DrawCategory({ Name = "Системные вкладки" });
+
+local SettingTab = Window:DrawTab({ Icon = "settings", Name = "Настройки", Type = "Single", EnableScrolling = true });
+local ThemeTab = Window:DrawTab({ Icon = "paintbrush", Name = "Темы", Type = "Single" });
+
+--// --- СЕКЦИИ И КОНТЕНТ ---
+
+local HomeSection = HomeTab:DrawSection({ Name = "Добро пожаловать в HorryMod", Position = 'left' });
+HomeSection:AddParagraph({
+	Title = "Инструкция по использованию",
+	Content = "• Вкладка «DOORS Функции»:\n  Исправлены наслаивания текста и фильтр лифтов.\n\n• Вкладка «Т.д»:\n  Трейсеры, No-Clip и ускорение."
+})
+
+local ESPSection = DoorsTab:DrawSection({ Name = "Подсветка и Обводка (ESP)", Position = 'left' });
+local LightSection = DoorsTab:DrawSection({ Name = "Освещение", Position = 'right' });
+
+local modStates = {
+	DoorsESP = false,
+	MonstersESP = false,
+	PlayersESP = false,
+	
+	TextColor = Color3.fromRGB(255, 255, 255),
+	OutlineColor = Color3.fromRGB(0, 255, 100),
+	TracerColor = Color3.fromRGB(0, 170, 255),
+	
+	Tracers1 = false,
+	Tracers2 = false,
+	
+	NoClip = false,
+	SpeedBoost = false,
+	SpeedValue = 21,
+	FullBright = false
+}
 local Library = {
 	Font = Enum.Font.RobotoCondensed,
 	Rainbow = false,
@@ -354,3 +602,52 @@ local CameraConnection = Workspace:GetPropertyChangedSignal("CurrentCamera"):Con
 end)
 
 return Library
+--// --- ДОБАВЛЕНИЕ КНОПОК ВО ВКЛАДКУ DOORS ФУНКЦИИ ---
+
+local ESPSection = DoorsTab:DrawSection({ Name = "Подсветка и Обводка (ESP)", Position = 'left' });
+
+ESPSection:AddToggle({
+	Name = "Включить ESP (Тест)",
+	Default = false,
+	Callback = function(Value)
+		modStates.DoorsESP = Value
+		if Value then
+			-- Пример добавления объектов в ESP (например, поиск моделей в Workspace)
+			for _, obj in ipairs(Workspace:GetChildren()) do
+				if obj:IsA("Model") and obj ~= LocalPlayer.Character then
+					Library:AddESP({
+						Object = obj,
+						Text = obj.Name,
+						Color = Color3.fromRGB(0, 255, 100)
+					})
+				end
+			end
+			Notifier.new({ Title = "ESP", Content = "Подсветка включена!", Duration = 3 })
+		else
+			-- Очистка или отключение
+			for _, obj in ipairs(Library.TotalObjects) do
+				Library:RemoveESP(obj)
+			end
+			Notifier.new({ Title = "ESP", Content = "Подсветка выключена!", Duration = 3 })
+		end
+	end
+})
+
+ESPSection:AddSlider({
+	Name = "Прозрачность заливки",
+	Min = 0,
+	Max = 1,
+	Default = 0.75,
+	Decimal = 2,
+	Callback = function(Value)
+		Library:SetFillTransparency(Value)
+	end
+})
+
+ESPSection:AddToggle({
+	Name = "Показывать дистанцию",
+	Default = false,
+	Callback = function(Value)
+		Library:SetShowDistance(Value)
+	end
+})
