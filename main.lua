@@ -414,8 +414,4 @@ ThemeTab:DrawSection({ Name = "Темы Меню" }):AddDropdown({
 
 local ConfigUI = Window:DrawConfig({
 	Name = "Конфиг",
-	Icon = "folder",
-	Config = ConfigManager
-});
-
-ConfigUI:Init();
+	Icon = "folder
